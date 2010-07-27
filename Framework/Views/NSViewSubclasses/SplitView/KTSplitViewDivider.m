@@ -14,13 +14,20 @@
 - (void)dividerAnimationDidEnd;
 @end
 
+@interface KTSplitViewDivider ()
+@property (nonatomic, readwrite, retain) NSCursor * currentCursor;
+@end
+
 @interface KTSplitViewDivider (Private)
 - (void)_resetTrackingArea;
+- (NSRect)_trackingRect;
+- (void)_setCursor:(NSCursor *)theCursor;
 @end
 
 @implementation KTSplitViewDivider
 @synthesize splitView = wSplitView;
 @synthesize isInDrag = mIsInDrag;
+@synthesize currentCursor = mCurrentCursor;
 
 //=========================================================== 
 // - initWithSplitView
@@ -66,6 +73,7 @@
 - (void)dealloc
 {
 	[mTrackingArea release];
+	[mCurrentCursor release];
 	[super dealloc];
 }
 
@@ -75,37 +83,48 @@
 //===========================================================
 - (void)_resetTrackingArea
 {
-//	if(mTrackingArea)
-//	{
-//		[self removeTrackingArea:mTrackingArea];
-//		[mTrackingArea release];
-//	}
-//	NSRect	aTrackingRect = [self bounds];
-//	CGFloat	aPadding = 10;
-//	if([[self splitView] dividerOrientation] == KTSplitViewDividerOrientation_Horizontal)
-//	{
-//		if(aTrackingRect.size.height < aPadding)
-//		{
-//			CGFloat aCenterY = NSMidY(aTrackingRect);
-//			aTrackingRect.size.height = aPadding;
-//			aTrackingRect.origin.y = aCenterY - aPadding*.5;
-//		}
-//	}
-//	else
-//	{
-//		if(aTrackingRect.size.width < aPadding)
-//		{
-//			CGFloat aCenterX = NSMidX(aTrackingRect);
-//			aTrackingRect.size.width = aPadding;
-//			aTrackingRect.origin.x = aCenterX - aPadding*.5;
-//		}
-//	}
-//	mTrackingArea = [[NSTrackingArea alloc] initWithRect:aTrackingRect
-//												 options:(NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited | NSTrackingAssumeInside | NSTrackingEnabledDuringMouseDrag) 
-//												   owner:self userInfo:nil];
-//	[self addTrackingArea:mTrackingArea];	
+	if([[self splitView] userInteractionEnabled] == NO)
+		return;
+		
+	if(mTrackingArea)
+	{
+		[self removeTrackingArea:mTrackingArea];
+		[mTrackingArea release];
+	}
+	NSRect	aTrackingRect = [self _trackingRect];
+	mTrackingArea = [[NSTrackingArea alloc] initWithRect:aTrackingRect
+												 options:(NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited | NSTrackingAssumeInside | NSTrackingEnabledDuringMouseDrag) 
+												   owner:self userInfo:nil];
+	[self addTrackingArea:mTrackingArea];	
 }
 
+//=========================================================== 
+// - _trackingRect
+//===========================================================
+- (NSRect)_trackingRect
+{
+	NSRect	aTrackingRect = [self bounds];
+	CGFloat	aPadding = 7;
+	if([[self splitView] dividerOrientation] == KTSplitViewDividerOrientation_Horizontal)
+	{
+		if(aTrackingRect.size.height < aPadding)
+		{
+			CGFloat aCenterY = NSMidY(aTrackingRect);
+			aTrackingRect.size.height = aPadding;
+			aTrackingRect.origin.y = aCenterY - aPadding*.5;
+		}
+	}
+	else
+	{
+		if(aTrackingRect.size.width < aPadding)
+		{
+			CGFloat aCenterX = NSMidX(aTrackingRect);
+			aTrackingRect.size.width = aPadding;
+			aTrackingRect.origin.x = aCenterX - aPadding*.5;
+		}
+	}
+	return aTrackingRect;
+}
 
 //=========================================================== 
 // - setFrame:time
@@ -161,8 +180,9 @@
 //		}
 //	}
 
-
+	
 	[super setFrame:theFrame];
+	[self _resetTrackingArea];
 //	[[self splitView] resetResizeInformation];
 	[[self splitView] layoutViews];
 }
@@ -172,6 +192,9 @@
 //===========================================================
 - (NSView*)hitTest:(NSPoint)thePoint
 {
+	if([[self splitView] userInteractionEnabled] == NO)
+		return nil;
+		
 	if(NSPointInRect([self convertPoint:thePoint fromView:nil], [mTrackingArea rect]))
 		return self;
 	else
@@ -186,6 +209,7 @@
 {
 	if([[self splitView] userInteractionEnabled] == NO)
 		return;
+	[[self window] disableCursorRects];
 }
 
 
@@ -242,45 +266,68 @@
 	mIsInDrag = NO;
 	[self _resetTrackingArea];
 	[[self splitView] resetResizeInformation];
+	[[self window] enableCursorRects];
 }
 
 
 //=========================================================== 
 // - mouseEntered
 //===========================================================
-//- (void)mouseEntered:(NSEvent*)theEvent
-//{	
-////	if([[self splitView] userInteractionEnabled])
-////	{
-////		if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
-////		{
-////			[[NSCursor resizeUpDownCursor] set];
-////		}
-////		else
-////		{
-////			[[NSCursor resizeLeftRightCursor] set];
-////		}
-////	}
-////	NSLog(@"%@ mouseEntered", self);
-//}
+- (void)mouseEntered:(NSEvent*)theEvent
+{	
+	if([[self splitView] userInteractionEnabled])
+	{
+		if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
+		{
+			[[NSCursor resizeUpDownCursor] set];
+		}
+		else
+		{
+			[[NSCursor resizeLeftRightCursor] set];
+		}
+	}
+}
 
 
 //=========================================================== 
-// - mouseExited
+// - refreshCursors
 //===========================================================
-//- (void)mouseExited:(NSEvent*)theEvent
-//{
-////	NSLog(@"%@ mouseExited", self);
-////	if(mIsInDrag==NO)
-////	[[NSCursor arrowCursor] set];
-//}
+- (void)refreshCursors
+{
+	if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
+	{
+		[[NSCursor resizeUpDownCursor] set];
+	}
+	else
+	{
+		[[NSCursor resizeLeftRightCursor] set];
+	}
+}
+
+//=========================================================== 
+// - _setCursor
+//===========================================================
+- (void)_setCursor:(NSCursor*)theCursor
+{
+	if([[self window] isKeyWindow] == NO)
+		return;
+	if(theCursor)
+	{	
+		[NSCursor unhide];
+		[theCursor set];
+		[self addCursorRect:[self _trackingRect] cursor:theCursor];
+		[self setCurrentCursor:theCursor];
+	}
+}
 
 
 //=========================================================== 
-// - cursorUpdate
+// - resetCursorRects
 //===========================================================
-//- (void)cursorUpdate:(NSEvent *)theEvent
-//{
-////	NSLog(@"%@ cursorUpdate", self);
-//}
+- (void)resetCursorRects
+{
+	[self addCursorRect:[self _trackingRect] cursor:[self currentCursor]];
+}
+
+
 @end

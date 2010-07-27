@@ -1,1 +1,4 @@
 .svn
+build/
+*.pbxuser
+*.mode1v3

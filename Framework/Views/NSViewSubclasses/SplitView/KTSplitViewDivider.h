@@ -16,6 +16,7 @@
 	KTSplitView *		wSplitView;
 	BOOL				mIsInDrag;
 	NSTrackingArea *	mTrackingArea;
+	NSCursor *			mCurrentCursor;
 }
 @property (nonatomic, readwrite, assign) KTSplitView * splitView;
 @property (nonatomic, readonly) BOOL isInDrag;
