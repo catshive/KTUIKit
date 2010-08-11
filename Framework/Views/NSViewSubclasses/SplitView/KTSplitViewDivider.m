@@ -209,7 +209,7 @@
 {
 	if([[self splitView] userInteractionEnabled] == NO)
 		return;
-	[[self window] disableCursorRects];
+//	[[self window] disableCursorRects];
 }
 
 
@@ -262,11 +262,14 @@
 //===========================================================
 - (void)mouseUp:(NSEvent*)theEvent
 {
+	if([[self splitView] userInteractionEnabled] == NO)
+		return;
+		
 //	NSLog(@"%@ mouseUP", self);
 	mIsInDrag = NO;
 	[self _resetTrackingArea];
 	[[self splitView] resetResizeInformation];
-	[[self window] enableCursorRects];
+//	[[self window] enableCursorRects];
 }
 
 
@@ -275,15 +278,20 @@
 //===========================================================
 - (void)mouseEntered:(NSEvent*)theEvent
 {	
+	if([[self splitView] userInteractionEnabled] == NO)
+		return;
+		
 	if([[self splitView] userInteractionEnabled])
 	{
 		if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
 		{
-			[[NSCursor resizeUpDownCursor] set];
+			NSLog(@"setting up/down cursor");
+			[self _setCursor:[NSCursor resizeUpDownCursor]];
 		}
 		else
 		{
-			[[NSCursor resizeLeftRightCursor] set];
+			NSLog(@"setting left/right cursor");	
+			[self _setCursor:[NSCursor resizeLeftRightCursor]];	
 		}
 	}
 }
@@ -294,13 +302,18 @@
 //===========================================================
 - (void)refreshCursors
 {
+	if([[self splitView] userInteractionEnabled] == NO)
+		return;
+		
 	if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
 	{
-		[[NSCursor resizeUpDownCursor] set];
+		NSLog(@"setting up/down cursor");
+		[self _setCursor:[NSCursor resizeUpDownCursor]];
 	}
 	else
 	{
-		[[NSCursor resizeLeftRightCursor] set];
+		NSLog(@"setting left/right cursor");	
+		[self _setCursor:[NSCursor resizeLeftRightCursor]];	
 	}
 }
 
@@ -309,6 +322,9 @@
 //===========================================================
 - (void)_setCursor:(NSCursor*)theCursor
 {
+	if([[self splitView] userInteractionEnabled] == NO)
+		return;
+		
 	if([[self window] isKeyWindow] == NO)
 		return;
 	if(theCursor)
@@ -326,7 +342,12 @@
 //===========================================================
 - (void)resetCursorRects
 {
-	[self addCursorRect:[self _trackingRect] cursor:[self currentCursor]];
+	if([[self splitView] userInteractionEnabled] == NO)
+		[super resetCursorRects];
+		
+	NSLog(@"reset cursor rects");
+	if([self currentCursor] != nil)
+		[self addCursorRect:[self _trackingRect] cursor:[self currentCursor]];
 }
 
 
