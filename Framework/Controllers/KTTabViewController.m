@@ -62,7 +62,7 @@
 //===========================================================
 - (void)dealloc
 {
-	NSLog(@"%@ dealloc", self);
+	//NSLog(@"%@ dealloc", self);
 	[mTabItemArrayController release];
 	[super dealloc];
 }
