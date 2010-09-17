@@ -139,7 +139,10 @@
 //=========================================================== 
 - (BOOL)canBecomeKeyView
 {
-	return mCanBecomeKeyView;
+	if(mCanBecomeKeyView == NO)
+		return mCanBecomeKeyView;
+		
+	return [super canBecomeKeyView];
 }
 
 //=========================================================== 
