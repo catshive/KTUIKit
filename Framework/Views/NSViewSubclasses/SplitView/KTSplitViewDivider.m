@@ -209,7 +209,35 @@
 {
 	if([[self splitView] userInteractionEnabled] == NO)
 		return;
-//	[[self window] disableCursorRects];
+	
+	NSEvent *anUpOrDraggedEvent = [[self window] nextEventMatchingMask:(NSLeftMouseDraggedMask|NSLeftMouseUpMask)];
+	while ([anUpOrDraggedEvent type] != NSLeftMouseUp) {
+		[self mouseDragged:anUpOrDraggedEvent];
+		anUpOrDraggedEvent = [[self window] nextEventMatchingMask:(NSLeftMouseDraggedMask|NSLeftMouseUpMask)]; // Block until we get an up or dragged event. If multiple events come in, |anUpOrDraggedEvent| will be the oldest in the queue.
+		if ([anUpOrDraggedEvent type] == NSLeftMouseUp) {
+			break;
+		}
+		
+		// |anUpOrDraggedEvent| is a dragged event. See if there are any NSLeftMouseUp events that may have also come in. +[NSDate distantPast] makes us wait with zero timeout.
+		NSEvent *anUpEvent = [[self window] nextEventMatchingMask:NSLeftMouseUpMask untilDate:[NSDate distantPast] inMode:NSEventTrackingRunLoopMode dequeue:YES];
+		if (anUpEvent != nil) {
+			// |anUpEvent| may not be the most recent in the queue, discard any possible preceding (unhandled) drag events.
+			[[self window] discardEventsMatchingMask:NSLeftMouseDraggedMask beforeEvent:anUpEvent];
+			break;
+		}
+		
+		// There were no NSLeftMouseUp events in the queue. Eat up any pending drag events until there's nothing left in the queue. If we don't we try to process too many drag events and the split view lags the mouse when the views are expensive to draw/resize.
+		// +[NSDate distantPast] ensures that we don't block until a new event comes it if there's nothing in the queue.
+		NSEvent *anEatenEvent = nil;
+		do {
+			anEatenEvent = [[self window] nextEventMatchingMask:(NSLeftMouseDraggedMask) 
+													  untilDate:[NSDate distantPast] 
+														 inMode:NSEventTrackingRunLoopMode 
+														dequeue:YES];
+		} while (anEatenEvent != nil);
+		
+	}
+	[self mouseUp:anUpOrDraggedEvent];
 }
 
 
