@@ -230,6 +230,7 @@
 		// +[NSDate distantPast] ensures that we don't block until a new event comes it if there's nothing in the queue.
 		NSEvent *anEatenEvent = nil;
 		do {
+			if (anEatenEvent != nil) anUpOrDraggedEvent = anEatenEvent; // As we're discarding all pending drag events, we keep the last one we find around. This most recent event is the one we next pass to -mouseDragged: at the top of our while loop, rather than passing the oldest (the one we get when we block at the top of the loop).
 			anEatenEvent = [[self window] nextEventMatchingMask:(NSLeftMouseDraggedMask) 
 													  untilDate:[NSDate distantPast] 
 														 inMode:NSEventTrackingRunLoopMode 
