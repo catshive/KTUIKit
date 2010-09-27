@@ -400,6 +400,15 @@
 	}
 }
 
+- (void)viewDidMoveToWindow
+{
+	// send the message to our layer
+	if(mOpenGLLayer)
+	{
+		[mOpenGLLayer viewDidMoveToWindow];
+	}	
+}
+
 #pragma mark -
 #pragma mark Responder Chain
 //=========================================================== 

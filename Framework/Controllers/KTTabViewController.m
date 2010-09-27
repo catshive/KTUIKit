@@ -253,7 +253,7 @@
 //===========================================================
 - (KTTabItem*)selectedTabItem
 {
-	return [[mTabItemArrayController selectedObjects]lastObject];
+	return wCurrentSelectedTab;
 }
 
 //=========================================================== 
@@ -272,6 +272,7 @@
 {
 	if (!theTabItem)
 		return;
+	
 	[mTabItemArrayController setSelectedObjects:[NSArray arrayWithObject:theTabItem]];
 }
 
@@ -304,7 +305,6 @@
 		When we select a new view controller, we can re-set its represented object for bindings/kvo and also
 		add it as a subcontroller to put it in the responder chain.
 	*/
-	
 
 		if([[self delegate] respondsToSelector:@selector(tabViewController:willSelectTabItem:)])
 			[[self delegate] tabViewController:self willSelectTabItem:theTabItem];

@@ -381,16 +381,42 @@
 //===========================================================
 - (void)viewWillMoveToWindow:(NSWindow*)theWindow
 {
+	[self layerWillMoveToWindow:theWindow];
 	for(KTOpenGLLayer * aSublayer in mSublayers)
 	{
-		if([aSublayer respondsToSelector:@selector(viewWillMoveToWindow:)])
-			[aSublayer viewWillMoveToWindow:theWindow];
+		if([aSublayer respondsToSelector:@selector(layerWillMoveToWindow:)])
+			[aSublayer layerWillMoveToWindow:theWindow];
 	}
-	
-	// subclasses make sure to call super!
 }
 
+//=========================================================== 
+// - layerWillMoveToWindow:
+//===========================================================
+- (void)layerWillMoveToWindow:(NSWindow*)theWindow
+{
+	// for subclasses
+}
 
+//=========================================================== 
+// - viewDidMoveToWindow
+//===========================================================
+- (void)viewDidMoveToWindow
+{
+	[self layerDidMoveToWindow];
+	for(KTOpenGLLayer * aSublayer in mSublayers)
+	{
+		if([aSublayer respondsToSelector:@selector(layerDidMoveToWindow)])
+			[aSublayer layerDidMoveToWindow];
+	}
+}
+
+//=========================================================== 
+// - layerDidMoveToWindow
+//===========================================================
+- (void)layerDidMoveToWindow
+{
+	// for subclasses
+}
 
 #pragma mark KTLayoutManager protocol
 //=========================================================== 

@@ -52,7 +52,10 @@
 - (void)drawOverlays;
 - (void)setNeedsDisplay:(BOOL)theBool;
 - (void)display;
-- (void)viewWillMoveToWindow:(NSWindow*)theWindow;
+- (void)viewWillMoveToWindow:(NSWindow*)theWindow;// subclasses shouldn't override this, instead use layerWillMoveToWindow:
+- (void)viewDidMoveToWindow; // subclasses shouldn't override this, instead use layerDidMoveToWindow:
+- (void)layerWillMoveToWindow:(NSWindow *)theWindow;
+- (void)layerDidMoveToWindow;
 
 - (KTOpenGLLayer*)hitTest:(NSPoint)thePoint;
 - (void)updateTrackingAreas;
