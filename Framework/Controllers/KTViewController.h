@@ -41,6 +41,7 @@
 {
 	@private
 	KTWindowController *		wWindowController;
+	KTViewController *			wParentViewController;
 	NSMutableArray *			mSubcontrollers;
 	NSMutableArray *			mTopLevelNibObjects;
 	NSMutableArray *			mLayerControllers;
@@ -48,6 +49,7 @@
 }
 
 @property(nonatomic, assign) KTWindowController * windowController;
+@property (nonatomic, readonly, assign) KTViewController * parentViewController;
 @property(nonatomic, readwrite, assign) BOOL hidden;
 
 + (id)viewControllerWithWindowController:(KTWindowController*)theWindowController;

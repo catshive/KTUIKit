@@ -48,6 +48,10 @@
 #import "KTWindowController.h"
 #import "KTLayerController.h"
 
+@interface KTViewController ()
+@property (nonatomic, readwrite, assign) KTViewController * parentViewController;
+@end
+
 
 @interface KTViewController (Private)
 - (void)releaseNibObjects;
@@ -58,6 +62,7 @@
 // - @synthesize
 //=========================================================== 
 @synthesize windowController = wWindowController;
+@synthesize parentViewController = wParentViewController;
 @synthesize hidden = mHidden;
 
 
@@ -107,6 +112,8 @@
 	//NSLog(@"%@ dealloc", self);
 	[self releaseNibObjects];
 //	[mSubcontrollers makeObjectsPerformSelector:@selector(removeObservations)];
+	for(KTViewController * aViewController in mSubcontrollers)
+		[aViewController setParentViewController:nil];
 	[mSubcontrollers release];
 //	[mLayerControllers makeObjectsPerformSelector:@selector(removeObservations)];
 	[mLayerControllers release];
@@ -180,6 +187,8 @@
 		[mSubcontrollers release];
 		mSubcontrollers = aNewSubcontrollers;
 		[[self windowController] patchResponderChain];
+		for(KTViewController*aSubcontroller in mSubcontrollers)
+			[aSubcontroller setParentViewController:self];
 	}
 }
 
@@ -202,6 +211,7 @@
 	{
 		[mSubcontrollers addObject:theViewController];
 		[[self windowController] patchResponderChain];
+		[theViewController setParentViewController:self];
 	}
 }
 
@@ -217,6 +227,7 @@
 		[theViewController removeObservations];
 		[mSubcontrollers removeObject:theViewController];
 		[[self windowController] patchResponderChain];
+		[theViewController setParentViewController:nil];
 	}
 }
 
@@ -227,6 +238,8 @@
 //=========================================================== 
 - (void)removeAllSubcontrollers
 {
+	for(KTViewController*aSubcontroller in mSubcontrollers)
+		[aSubcontroller setParentViewController:nil];
 	[self setSubcontrollers:[NSArray array]];
 	[[self windowController] patchResponderChain];
 }
