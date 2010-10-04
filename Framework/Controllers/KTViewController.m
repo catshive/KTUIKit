@@ -224,10 +224,10 @@
 {
 	if(theViewController)
 	{
+		[theViewController setParentViewController:nil];	
 		[theViewController removeObservations];
 		[mSubcontrollers removeObject:theViewController];
 		[[self windowController] patchResponderChain];
-		[theViewController setParentViewController:nil];
 	}
 }
 
