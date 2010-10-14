@@ -28,6 +28,7 @@
 #import <KTUIKit/KTTabViewController.h>
 #import <KTUIKit/KTTabItem.h>
 #import <KTUIKit/KTSplitView.h>
+#import <KTUIKit/KTSplitViewDivider.h>
 #import <KTUIKit/NSBezierPathAdditions.h>
 #import <KTUIKit/KTViewOverlayWindow.h>
 #import <KTUIKit/KTControl.h>
