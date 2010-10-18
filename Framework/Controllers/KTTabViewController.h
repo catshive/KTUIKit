@@ -15,7 +15,6 @@
 @interface KTTabViewController : KTViewController 
 {
 	@private
-	KTView *				wContentView;
 	NSArrayController *		mTabItemArrayController;
 	KTTabItem *				wCurrentSelectedTab;
 	BOOL					mReleaseViewControllersWhenNotSeletcted;

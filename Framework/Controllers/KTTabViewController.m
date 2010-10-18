@@ -18,6 +18,10 @@
 - (void)tabViewController:(KTTabViewController*)theTabViewController didAddTabItem:(KTTabItem*)theTabItem;
 @end
 
+@interface KTTabViewController ()
+- (KTView *)view;
+@end
+
 @interface KTTabViewController (Private)
 - (void)_selectTabItem:(KTTabItem*)theTabItem;
 @end
@@ -40,10 +44,10 @@
 	{
 		// create the 'content view' - when we switch controllers
 		// we'll be adding/removing their views to and from this 'content' view
-		wContentView = [[[KTView alloc] initWithFrame:NSZeroRect] autorelease];
-		[[wContentView viewLayoutManager] setWidthType:KTSizeFill];
-		[[wContentView viewLayoutManager] setHeightType:KTSizeFill];
-		[self setView:wContentView];
+		KTView *aContentView = [[[KTView alloc] initWithFrame:NSZeroRect] autorelease];
+		[[aContentView viewLayoutManager] setWidthType:KTSizeFill];
+		[[aContentView viewLayoutManager] setHeightType:KTSizeFill];
+		[self setView:aContentView];
 		
 		// create an array that will hold our list of KSTabItems - users can bind to the
 		// arranged objects and selectionIndex property to control the tab (to a pop up button or a custom tab view, for example)
@@ -74,6 +78,11 @@
 {
 	[mTabItemArrayController removeObserver:self forKeyPath:@"selectionIndex"];
 	[super removeObservations];
+}
+
+- (KTView *)view
+{
+	return (KTView *)[super view];
 }
 
 //=========================================================== 
@@ -328,7 +337,7 @@
 		// now select the new view controller
 		KTViewController * aViewControllerToSelect = [theTabItem viewController];
 		KTView * aViewForTab = (KTView*)[aViewControllerToSelect view];
-		[wContentView addSubview:aViewForTab];
+		[[self view] addSubview:aViewForTab];
 		[aViewControllerToSelect setHidden:NO];
 		
 		// layout
@@ -336,7 +345,7 @@
 		{
 			[[aViewForTab viewLayoutManager] setWidthType:KTSizeFill];
 			[[aViewForTab viewLayoutManager] setHeightType:KTSizeFill];
-			[[wContentView viewLayoutManager] refreshLayout];	
+			[[[self view] viewLayoutManager] refreshLayout];	
 		}
 		else
 		{
