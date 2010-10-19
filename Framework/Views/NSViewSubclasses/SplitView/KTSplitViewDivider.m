@@ -16,6 +16,7 @@
 
 @interface KTSplitViewDivider ()
 @property (nonatomic, readwrite, retain) NSCursor * currentCursor;
+@property (nonatomic, readwrite, assign) CGSize initialMouseOffset;
 @end
 
 @interface KTSplitViewDivider (Private)
@@ -28,7 +29,7 @@
 @synthesize splitView = wSplitView;
 @synthesize isInDrag = mIsInDrag;
 @synthesize currentCursor = mCurrentCursor;
-
+@synthesize initialMouseOffset = mInitialMouseOffset;
 //=========================================================== 
 // - initWithSplitView
 //===========================================================
@@ -210,6 +211,10 @@
 	if([[self splitView] userInteractionEnabled] == NO)
 		return;
 	
+	NSPoint anInitialMouseLocation = [[self splitView] convertPoint:[theEvent locationInWindow] fromView:nil];
+	CGSize anInitialMouseOffset = CGSizeMake(anInitialMouseLocation.x - NSMidX([self frame]), anInitialMouseLocation.y - NSMidY([self frame]));
+	[self setInitialMouseOffset:anInitialMouseOffset]; // See -mouseDragged:
+	
 	NSEvent *anUpOrDraggedEvent = [[self window] nextEventMatchingMask:(NSLeftMouseDraggedMask|NSLeftMouseUpMask)];
 	while ([anUpOrDraggedEvent type] != NSLeftMouseUp) {
 		[self mouseDragged:anUpOrDraggedEvent];
@@ -256,14 +261,22 @@
 		return;
 		
 	NSPoint	aMousePoint = [[self splitView] convertPoint:[theEvent locationInWindow] fromView:nil];
+	
 	NSRect	aSplitViewBounds = [[self splitView] bounds];
 	NSRect	aSplitViewFrame = [[self splitView] frame];
 	NSRect	aDividerBounds = [self bounds];
 	NSRect	aDividerFrame = [self frame];
 	
+	/* 
+	 To support split view handles (those generally in some sort of toolbar, 
+	 a small rectangle elsewhere in the UI) we need to know where the initial 
+	 -mouseDown: location was and account for that to ensure that the divider 
+	 doesn't jump under the mouse cursor on the first -mouseDragged: event.
+	 This way, a drag handle view can simply call mouseDown: on the divider.
+	 */
 	if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
 	{
-		float aPoint = floor(aMousePoint.y - aDividerBounds.size.height*.5);
+		CGFloat aPoint = floor(aMousePoint.y - aDividerBounds.size.height*.5 - [self initialMouseOffset].height);
 		
 		if(		aPoint >= aSplitViewBounds.origin.x 
 			&&	aPoint <= aSplitViewFrame.size.height-aDividerBounds.size.height )
@@ -276,7 +289,7 @@
 	}
 	else 
 	{
-		float aPoint = floor(aMousePoint.x-aDividerBounds.size.width*.5);
+		CGFloat aPoint = floor(aMousePoint.x-aDividerBounds.size.width*.5 - [self initialMouseOffset].width);
 		if(aPoint >= aSplitViewBounds.origin.y && aPoint <= aSplitViewFrame.size.width-aDividerBounds.size.width)
 		{
 			[[NSCursor resizeLeftRightCursor] set];

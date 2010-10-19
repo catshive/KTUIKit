@@ -79,6 +79,7 @@ typedef enum
 @property (nonatomic, readwrite, assign) KTSplitViewResizeBehavior resizeBehavior;
 @property (nonatomic, readwrite, assign) BOOL userInteractionEnabled;
 @property (nonatomic, readwrite, assign) CGFloat dividerThickness;
+@property (nonatomic, readwrite, retain) KTSplitViewDivider * divider;
 
 - (id)initWithFrame:(NSRect)theFrame dividerOrientation:(KTSplitViewDividerOrientation)theDividerOrientation;
 - (void)setFirstView:(NSView<KTView>*)theView;
@@ -95,6 +96,6 @@ typedef enum
 - (void)setDividerBackgroundGradient:(NSGradient*)theGradient;
 - (void)setDividerStrokeColor:(NSColor*)theColor;
 - (void)setDividerFirstStrokeColor:(NSColor*)theFirstColor secondColor:(NSColor*)theSecondColor;
-- (void)setDivider:(KTSplitViewDivider*)theDivider;
+//- (void)setDivider:(KTSplitViewDivider*)theDivider;
 
 @end

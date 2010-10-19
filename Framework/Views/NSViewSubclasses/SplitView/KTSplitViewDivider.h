@@ -17,6 +17,7 @@
 	BOOL				mIsInDrag;
 	NSTrackingArea *	mTrackingArea;
 	NSCursor *			mCurrentCursor;
+	CGSize				mInitialMouseOffset;
 }
 @property (nonatomic, readwrite, assign) KTSplitView * splitView;
 @property (nonatomic, readonly) BOOL isInDrag;

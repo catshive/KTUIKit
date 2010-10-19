@@ -12,7 +12,7 @@
 
 
 @interface KTSplitView ()
-@property (nonatomic, readwrite, retain) KTSplitViewDivider * divider;
+
 @end
 
 @interface KTSplitView (Private)
