@@ -35,7 +35,16 @@
 {
 //	NSLog(@"%@ dealloc", self);
 	[mLabel release];
+	[mUserInfo release];
 	[super dealloc];
+}
+
+- (NSMutableDictionary *)userInfo;
+{
+	if (mUserInfo != nil)
+		return mUserInfo;
+	mUserInfo = [[NSMutableDictionary alloc] init];
+	return mUserInfo;
 }
 
 @end
