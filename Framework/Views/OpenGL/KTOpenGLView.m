@@ -196,8 +196,8 @@
 {
 	[super reshape];
 	[self setup2DCamera];
-	if(mOpenGLLayer)
-		[mOpenGLLayer setFrame:[self bounds]];
+//	if(mOpenGLLayer)
+//		[mOpenGLLayer setFrame:[self bounds]];
 }
 
 //=========================================================== 
@@ -328,7 +328,11 @@
 	[self setShouldAcceptFirstResponder:YES];
 }
 
-
+- (void)setFrameSize:(NSSize)theSize;
+{
+	[super setFrameSize:theSize];
+	[mOpenGLLayer setFrame:[self bounds]];
+}
 
 
 #pragma mark -
