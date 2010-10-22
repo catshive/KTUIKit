@@ -74,9 +74,9 @@ typedef enum
 	NSViewAnimation *					mAnimator;
 	
 	CGFloat								mPreferredFirstViewMinSize;
-	CGFloat								mPreferredFirstViewMaxSize;
 	CGFloat								mPreferredSecondViewMinSize;
-	CGFloat								mPreferredSecondViewMaxSize;
+	CGFloat								mPreferredMaxSize;
+	KTSplitViewFocusedViewFlag			mPreferredMaxSizeRelativeView;
 }
 
 @property (nonatomic, readwrite, assign) IBOutlet id <KTSplitViewDelegate> delegate;
