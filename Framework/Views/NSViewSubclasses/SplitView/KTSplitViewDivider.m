@@ -361,12 +361,12 @@
 		if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
 		{
 //			NSLog(@"setting up/down cursor");
-			[self _setCursor:[NSCursor resizeUpDownCursor]];
+			[self _setCursor:[self cursorForCurrentPosition]];
 		}
 		else
 		{
 //			NSLog(@"setting left/right cursor");	
-			[self _setCursor:[NSCursor resizeLeftRightCursor]];	
+			[self _setCursor:[self cursorForCurrentPosition]];	
 		}
 	}
 }
@@ -383,12 +383,12 @@
 	if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
 	{
 		//NSLog(@"setting up/down cursor");
-		[self _setCursor:[NSCursor resizeUpDownCursor]];
+		[self _setCursor:[self cursorForCurrentPosition]];
 	}
 	else
 	{
 		//NSLog(@"setting left/right cursor");	
-		[self _setCursor:[NSCursor resizeLeftRightCursor]];	
+		[self _setCursor:[self cursorForCurrentPosition]];	
 	}
 }
 
