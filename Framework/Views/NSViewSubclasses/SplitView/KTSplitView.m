@@ -414,6 +414,7 @@
 #pragma mark -
 #pragma mark Divider Position
 
+// Note that if the [self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_Unknown this returns CGFLOAT_MAX
 - (CGFloat)_calculatedMaxSize;
 {
 	CGFloat anActualMaxSize = [self preferredMaxSize];
@@ -427,6 +428,7 @@
 }
 
 // |thePosition| is an x or y value
+// if the [self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_Unknown the max constraint is ignored.
 - (CGFloat)dividerPositionForProposedPosition:(CGFloat)thePosition;
 {
 	CGFloat aNewPosition = thePosition;
