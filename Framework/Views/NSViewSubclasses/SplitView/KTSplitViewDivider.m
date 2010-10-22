@@ -253,13 +253,27 @@
 
 - (NSCursor *)cursorForCurrentPosition;
 {
-	if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
+	KTSplitView *aSplitView = [self splitView];
+	KTSplitViewDividerOrientation anOrientation = [aSplitView dividerOrientation];
+	if(anOrientation == KTSplitViewDividerOrientation_Horizontal)
 	{
-		return [NSCursor resizeUpDownCursor];
+		if (![aSplitView canResizeRelativeToView:KTSplitViewFocusedViewFlag_FirstView]) {
+			return [NSCursor resizeDownCursor];
+		} else if (![aSplitView canResizeRelativeToView:KTSplitViewFocusedViewFlag_SecondView]) {
+			return [NSCursor resizeUpCursor];
+		} else {
+			return [NSCursor resizeUpDownCursor];
+		}
 	}
 	else
 	{
-		return [NSCursor resizeLeftRightCursor];
+		if (![aSplitView canResizeRelativeToView:KTSplitViewFocusedViewFlag_FirstView]) {
+			return [NSCursor resizeRightCursor];
+		} else if (![aSplitView canResizeRelativeToView:KTSplitViewFocusedViewFlag_SecondView]) {
+			return [NSCursor resizeLeftCursor];
+		} else {
+			return [NSCursor resizeLeftRightCursor];
+		}
 	}
 }
 
