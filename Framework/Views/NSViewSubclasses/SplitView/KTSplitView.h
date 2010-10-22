@@ -41,8 +41,9 @@ typedef enum
 
 typedef enum
 {
-	KTSplitViewFocusedViewFlag_FirstView = 0,
-	KTSplitViewFocusedViewFlag_SecondView
+	KTSplitViewFocusedViewFlag_Unknown = 0,
+	KTSplitViewFocusedViewFlag_FirstView = 1,
+	KTSplitViewFocusedViewFlag_SecondView = 2
 	
 }KTSplitViewFocusedViewFlag;
 
@@ -96,6 +97,8 @@ typedef enum
 - (void)setFirstView:(NSView<KTView>*)theFirstView secondView:(NSView<KTView>*)theSecondView;
 - (void)setPreferredMinSize:(CGFloat)theFloat relativeToView:(KTSplitViewFocusedViewFlag)theView;
 - (void)setPreferredMaxSize:(CGFloat)theFloat relativeToView:(KTSplitViewFocusedViewFlag)theView;
+- (void)disableMaxSizeConstraint;
+
 - (void)setDividerPosition:(CGFloat)thePosition relativeToView:(KTSplitViewFocusedViewFlag)theView;
 - (void)setDividerPosition:(CGFloat)thePosition relativeToView:(KTSplitViewFocusedViewFlag)theView animate:(BOOL)theBool animationDuration:(float)theTimeInSeconds;
 - (CGFloat)dividerPositionRelativeToView:(KTSplitViewFocusedViewFlag)theFocusedViewFlag;

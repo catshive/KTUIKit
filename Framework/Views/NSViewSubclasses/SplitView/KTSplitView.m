@@ -78,7 +78,7 @@
 		[mSecondView setLabel:@"KTSplitView second view"];
 		
 		mPreferredMaxSize = CGFLOAT_MAX;
-		mPreferredMaxSizeRelativeView = KTSplitViewFocusedViewFlag_FirstView;
+		mPreferredMaxSizeRelativeView = KTSplitViewFocusedViewFlag_Unknown;
 	}
 	return self;
 }
@@ -132,7 +132,7 @@
 	[mSecondView setLabel:@"KTSplitView second view"];
 		
 	mPreferredMaxSize = CGFLOAT_MAX;
-	mPreferredMaxSizeRelativeView = KTSplitViewFocusedViewFlag_FirstView;
+	mPreferredMaxSizeRelativeView = KTSplitViewFocusedViewFlag_Unknown;
 	
 	return self;
 }
@@ -263,7 +263,10 @@
 					mResizeInformation = [[self firstViewContainer] frame].size.height;
 					mResetResizeInformation = NO;
 				}
-				[[self divider] setFrame:NSMakeRect(anOldDividerFrame.origin.x, theNewFrameSize.height-mResizeInformation, theNewFrameSize.width, anOldDividerFrame.size.height)];
+				CGFloat aNewYOrdinate = theNewFrameSize.height-mResizeInformation;
+				CGFloat aConstrainedYOrdinate = [self dividerPositionForProposedPosition:aNewYOrdinate];
+				mResizeInformation = theNewFrameSize.height - aConstrainedYOrdinate;
+				[[self divider] setFrame:NSMakeRect(anOldDividerFrame.origin.x, aConstrainedYOrdinate, theNewFrameSize.width, anOldDividerFrame.size.height)];
 			}
 			else
 			{
@@ -287,6 +290,7 @@
 					mResizeInformation = [[self secondViewContainer] frame].size.height;
 					mResetResizeInformation = NO;
 				}
+				mResizeInformation = [self dividerPositionForProposedPosition:mResizeInformation];
 				[[self divider] setFrame:NSMakeRect(anOldDividerFrame.origin.x, mResizeInformation, theNewFrameSize.width, anOldDividerFrame.size.height)];
 			}
 			else
@@ -390,7 +394,7 @@
 {
 	if (theView == KTSplitViewFocusedViewFlag_FirstView) {
 		[self setPreferredFirstViewMinSize:theFloat];
-	} else {
+	} else if (theView == KTSplitViewFocusedViewFlag_SecondView) {
 		[self setPreferredSecondViewMinSize:theFloat];		
 	}
 }
@@ -399,6 +403,12 @@
 {
 	[self setPreferredMaxSize:theFloat];
 	[self setPreferredMaxSizeRelativeView:theView];		
+}
+
+- (void)disableMaxSizeConstraint;
+{
+	[self setPreferredMaxSize:CGFLOAT_MAX];
+	[self setPreferredMaxSizeRelativeView:KTSplitViewFocusedViewFlag_Unknown];
 }
 
 #pragma mark -
@@ -410,10 +420,7 @@
 	if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_FirstView) {
 		// Ensure the max size never smaller than the min size.
 		anActualMaxSize = MAX([self preferredFirstViewMinSize], [self preferredMaxSize]);
-		
-		
-		
-	} else {
+	} else if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_SecondView) {
 		anActualMaxSize = MAX([self preferredSecondViewMinSize], [self preferredMaxSize]);
 	}
 	return anActualMaxSize;
@@ -425,23 +432,32 @@
 	CGFloat aNewPosition = thePosition;
 	if([self dividerOrientation] == KTSplitViewDividerOrientation_Horizontal) {
 
+		// Here first and second are swapped (w.r.t the vertical case) as first is laid out above second.
+		aNewPosition = MAX(aNewPosition, NSMinY([self bounds]) + [self preferredSecondViewMinSize]);
+		aNewPosition = MIN(aNewPosition, NSMaxY([self bounds]) - [self preferredFirstViewMinSize]);
+		
+		if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_FirstView) {
+			aNewPosition = MIN(aNewPosition, NSMaxY([self bounds]) - [self _calculatedMaxSize]);
+		} else if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_SecondView) {
+			aNewPosition = MAX(aNewPosition, NSMinY([self bounds]) + [self _calculatedMaxSize]);
+		}
+		
 		// Force |aNewPosition| within the bounds of the split view
 		aNewPosition = MIN(MAX(aNewPosition, 0.0), NSMaxY([self bounds]));
 	} else {
 		// First limit the position such that the views cannot be shrunk further than their mins.
-		aNewPosition = MAX(thePosition, NSMinX([self bounds]) + [self preferredFirstViewMinSize]);
+		aNewPosition = MAX(aNewPosition, NSMinX([self bounds]) + [self preferredFirstViewMinSize]);
 		aNewPosition = MIN(aNewPosition, NSMaxX([self bounds]) - [self preferredSecondViewMinSize]);
 		
 		if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_FirstView) {
 			aNewPosition = MIN(aNewPosition, NSMinX([self bounds]) + [self _calculatedMaxSize]);
-		} else {
+		} else if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_SecondView) {
 			aNewPosition = MAX(aNewPosition, NSMaxX([self bounds]) - [self _calculatedMaxSize]);
 		}
 		
 		// Force |aNewPosition| within the bounds of the split view
 		aNewPosition = MIN(MAX(aNewPosition, 0.0), NSMaxX([self bounds]));
 	}
-	NSLog(@"%p %s %f %f", self, __func__, thePosition, aNewPosition);
 	return aNewPosition;
 }
 
@@ -536,14 +552,14 @@
 	{
 		if(theFocusedViewFlag == KTSplitViewFocusedViewFlag_FirstView)
 			aDividerPosition = [self bounds].size.height - [[self divider]  frame].origin.y;
-		else
+		else if (theFocusedViewFlag == KTSplitViewFocusedViewFlag_SecondView)
 			aDividerPosition = [[self divider] frame].origin.y;
 	}
 	else
 	{
 		if(theFocusedViewFlag == KTSplitViewFocusedViewFlag_FirstView)
 			aDividerPosition = [[self divider]  frame].origin.x;
-		else
+		else if (theFocusedViewFlag == KTSplitViewFocusedViewFlag_SecondView)
 			aDividerPosition = [self bounds].size.width - [[self divider]  frame].origin.x;
 	}
 	return aDividerPosition;	
@@ -565,13 +581,14 @@
 	}
 	if(mAnimator == nil)
 	{
+		CGFloat aConstrainedOrdinate = [self dividerPositionForProposedPosition:thePosition];
+		
 		CGPoint aPositionToSet = NSPointToCGPoint([mDivider frame].origin);
 		if([self dividerOrientation] == KTSplitViewDividerOrientation_Horizontal)
-			aPositionToSet.y = thePosition;
+			aPositionToSet.y = aConstrainedOrdinate;
 		else
-			aPositionToSet.x = thePosition;
-//		thePosition = [self _dividerPositionForProposedPosition:thePosition relativeToView:theView];
-#warning this doesn't respect contraints		
+			aPositionToSet.x = aConstrainedOrdinate;
+
 		NSRect aNewFrame = [mDivider frame];
 		aNewFrame.origin = NSPointFromCGPoint(aPositionToSet);
 											
