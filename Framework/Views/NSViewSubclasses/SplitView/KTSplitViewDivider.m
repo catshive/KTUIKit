@@ -251,6 +251,17 @@
 	[self mouseUp:anUpOrDraggedEvent];
 }
 
+- (NSCursor *)cursorForCurrentPosition;
+{
+	if([[self splitView] dividerOrientation]  == KTSplitViewDividerOrientation_Horizontal)
+	{
+		return [NSCursor resizeUpDownCursor];
+	}
+	else
+	{
+		return [NSCursor resizeLeftRightCursor];
+	}
+}
 
 //=========================================================== 
 // - mouseDragged
@@ -281,7 +292,7 @@
 		if(		aPoint >= aSplitViewBounds.origin.x 
 			&&	aPoint <= aSplitViewFrame.size.height-aDividerBounds.size.height )
 		{
-			[[NSCursor resizeUpDownCursor] set];
+			[self _setCursor:[self cursorForCurrentPosition]];
 			NSRect aRect = aDividerFrame;
 			aPoint = [[self splitView] dividerPositionForProposedPosition:aPoint];
 			[self setFrame:NSMakeRect(aRect.origin.x, aPoint,
@@ -294,7 +305,7 @@
 		if(		aPoint >= aSplitViewBounds.origin.y 
 		   &&	aPoint <= aSplitViewFrame.size.width-aDividerBounds.size.width)
 		{
-			[[NSCursor resizeLeftRightCursor] set];
+			[self _setCursor:[self cursorForCurrentPosition]];
 			NSRect aRect = aDividerFrame;
 			aPoint = [[self splitView] dividerPositionForProposedPosition:aPoint];
 			[self setFrame:NSMakeRect(aPoint, aRect.origin.y,

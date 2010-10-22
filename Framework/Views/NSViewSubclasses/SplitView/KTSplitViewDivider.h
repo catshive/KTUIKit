@@ -22,4 +22,6 @@
 @property (nonatomic, readwrite, assign) KTSplitView * splitView;
 @property (nonatomic, readonly) BOOL isInDrag;
 - (id)initWithSplitView:(KTSplitView*)theSplitView;
+
+- (NSCursor *)cursorForCurrentPosition;
 @end
