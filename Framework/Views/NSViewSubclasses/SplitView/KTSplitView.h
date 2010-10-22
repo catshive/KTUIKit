@@ -94,8 +94,8 @@ typedef enum
 - (KTView*)firstViewContainer;
 - (KTView*)secondViewContainer;
 - (void)setFirstView:(NSView<KTView>*)theFirstView secondView:(NSView<KTView>*)theSecondView;
-- (void)setPreferredMinSize:(CGFloat)theFloat forView:(KTSplitViewFocusedViewFlag)theView;
-- (void)setPreferredMaxSize:(CGFloat)theFloat forView:(KTSplitViewFocusedViewFlag)theView;
+- (void)setPreferredMinSize:(CGFloat)theFloat relativeToView:(KTSplitViewFocusedViewFlag)theView;
+- (void)setPreferredMaxSize:(CGFloat)theFloat relativeToView:(KTSplitViewFocusedViewFlag)theView;
 - (void)setDividerPosition:(CGFloat)thePosition relativeToView:(KTSplitViewFocusedViewFlag)theView;
 - (void)setDividerPosition:(CGFloat)thePosition relativeToView:(KTSplitViewFocusedViewFlag)theView animate:(BOOL)theBool animationDuration:(float)theTimeInSeconds;
 - (CGFloat)dividerPositionRelativeToView:(KTSplitViewFocusedViewFlag)theFocusedViewFlag;
@@ -105,4 +105,6 @@ typedef enum
 - (void)setDividerFirstStrokeColor:(NSColor*)theFirstColor secondColor:(NSColor*)theSecondColor;
 //- (void)setDivider:(KTSplitViewDivider*)theDivider;
 
+// Called from the divider's mouse handling code
+- (CGFloat)dividerPositionForProposedPosition:(CGFloat)thePosition;
 @end

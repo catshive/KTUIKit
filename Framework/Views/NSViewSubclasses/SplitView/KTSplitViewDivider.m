@@ -283,6 +283,7 @@
 		{
 			[[NSCursor resizeUpDownCursor] set];
 			NSRect aRect = aDividerFrame;
+			aPoint = [[self splitView] dividerPositionForProposedPosition:aPoint];
 			[self setFrame:NSMakeRect(aRect.origin.x, aPoint,
 									  aRect.size.width, aRect.size.height) ];
 		}
@@ -290,10 +291,12 @@
 	else 
 	{
 		CGFloat aPoint = floor(aMousePoint.x-aDividerBounds.size.width*.5 - [self initialMouseOffset].width);
-		if(aPoint >= aSplitViewBounds.origin.y && aPoint <= aSplitViewFrame.size.width-aDividerBounds.size.width)
+		if(		aPoint >= aSplitViewBounds.origin.y 
+		   &&	aPoint <= aSplitViewFrame.size.width-aDividerBounds.size.width)
 		{
 			[[NSCursor resizeLeftRightCursor] set];
 			NSRect aRect = aDividerFrame;
+			aPoint = [[self splitView] dividerPositionForProposedPosition:aPoint];
 			[self setFrame:NSMakeRect(aPoint, aRect.origin.y,
 									  aRect.size.width, aRect.size.height) ];
 			
