@@ -414,21 +414,44 @@
 #pragma mark -
 #pragma mark Divider Position
 
+// Note that if the [self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_Unknown this returns CGFLOAT_MAX
+// As the min/max sizes set by clients are "preferred" sizes, we reseve the right to do what we want if the sizes are illogical.
+- (CGFloat)_calculatedMaxSize;
+{
+	CGFloat anActualMaxSize = [self preferredMaxSize];
+	if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_FirstView) {
+		// Ensure the max size never smaller than the min size.
+		anActualMaxSize = MAX([self preferredFirstViewMinSize], [self preferredMaxSize]);
+	} else if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_SecondView) {
+		anActualMaxSize = MAX([self preferredSecondViewMinSize], [self preferredMaxSize]);
+	}
+	return anActualMaxSize;
+}
+
 - (BOOL)canResizeRelativeToView:(KTSplitViewFocusedViewFlag)theView;
 {
 	NSRect aDividerFrame = [[self divider] frame];
 	NSRect aBounds = [self bounds];
 	KTSplitViewDividerOrientation aDividerOrientation = [self dividerOrientation];
+	CGFloat aMaxSize = [self _calculatedMaxSize];
+	KTSplitViewFocusedViewFlag aMaxRelativeView = [self preferredMaxSizeRelativeView];
+
 	BOOL aCanResize;
 	switch (aDividerOrientation) {
 		case KTSplitViewDividerOrientation_Horizontal:
 		{
 			switch (theView) {
 				case KTSplitViewFocusedViewFlag_FirstView:
-					aCanResize = (NSMinY(aDividerFrame) < (NSMaxY(aBounds) - [self preferredFirstViewMinSize] - NSHeight(aDividerFrame)));
+					aCanResize = (NSMaxY(aDividerFrame) < (NSMaxY(aBounds) - [self preferredFirstViewMinSize]));
+					if (aCanResize && aMaxRelativeView == KTSplitViewFocusedViewFlag_SecondView) {
+						aCanResize = (NSMinY(aDividerFrame) < (NSMinY(aBounds) + aMaxSize));
+					}
 					break;
 				case KTSplitViewFocusedViewFlag_SecondView:
 					aCanResize = (NSMinY(aDividerFrame) > (NSMinY(aBounds) + [self preferredSecondViewMinSize]));
+					if (aCanResize && aMaxRelativeView == KTSplitViewFocusedViewFlag_FirstView) {
+						aCanResize = (NSMaxY(aDividerFrame) > (NSMaxY(aBounds) - aMaxSize));
+					}
 					break;
 				default: // KTSplitViewFocusedViewFlag_Unknown
 					aCanResize = YES;
@@ -444,10 +467,17 @@
 			switch (theView) {
 				case KTSplitViewFocusedViewFlag_FirstView:
 					aCanResize = (NSMinX(aDividerFrame) > (NSMinX(aBounds) + [self preferredFirstViewMinSize]));
+					if (aCanResize && aMaxRelativeView == KTSplitViewFocusedViewFlag_SecondView) {
+						aCanResize = (NSMaxX(aDividerFrame) > (NSMaxX(aBounds) - aMaxSize));
+					}
 					break;
 				case KTSplitViewFocusedViewFlag_SecondView:
-					aCanResize = (NSMinX(aDividerFrame) < (NSMaxX(aBounds) - [self preferredSecondViewMinSize] - NSWidth(aDividerFrame)));
+					aCanResize = (NSMaxX(aDividerFrame) < (NSMaxX(aBounds) - [self preferredSecondViewMinSize]));
+					if (aCanResize && aMaxRelativeView == KTSplitViewFocusedViewFlag_FirstView) {
+						aCanResize = (NSMinX(aDividerFrame) < (NSMinX(aBounds) + aMaxSize));
+					}
 					break;
+					
 				default: // KTSplitViewFocusedViewFlag_Unknown
 					aCanResize = YES;
 					break;
@@ -456,58 +486,6 @@
 			break;			
 	}
 	return aCanResize;
-}
-
-//- (CGFloat)_calculatedFirstViewMinSize;
-//{
-//	KTSplitViewDividerOrientation anOrientation = [self dividerOrientation];
-//	CGFloat aMinSize;
-//	NSRect aBounds = [self bounds];
-//	switch (anOrientation) {
-//		case KTSplitViewDividerOrientation_Horizontal:
-//			aMinSize = [self preferredFirstViewMinSize];
-//			break;
-//		case KTSplitViewDividerOrientation_Vertical:
-//			aMinSize = [self preferredFirstViewMinSize];
-//			break;
-//		default: // KTSplitViewDividerOrientation_NotSet
-//			aMinSize = [self preferredFirstViewMinSize];
-//			break;
-//	}
-//	return aMinSize;
-//}
-//
-//- (CGFloat)_calculatedSecondViewMinSize;
-//{
-//	KTSplitViewDividerOrientation anOrientation = [self dividerOrientation];
-//	CGFloat aMinSize;
-//	NSRect aBounds = [self bounds];
-//	switch (anOrientation) {
-//		case KTSplitViewDividerOrientation_Horizontal:
-//			aMinSize = [self preferredSecondViewMinSize];
-//			break;
-//		case KTSplitViewDividerOrientation_Vertical:
-//			aMinSize = [self preferredSecondViewMinSize];
-//			break;
-//		default: // KTSplitViewDividerOrientation_NotSet
-//			aMinSize = [self preferredSecondViewMinSize];
-//			break;
-//	}
-//	return aMinSize;
-//}
-
-// Note that if the [self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_Unknown this returns CGFLOAT_MAX
-// As the min/max sizes set by clients are "preferred" sizes, we reseve the right to do what we want if the sizes are illogical.
-- (CGFloat)_calculatedMaxSize;
-{
-	CGFloat anActualMaxSize = [self preferredMaxSize];
-	if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_FirstView) {
-		// Ensure the max size never smaller than the min size.
-		anActualMaxSize = MAX([self preferredFirstViewMinSize], [self preferredMaxSize]);
-	} else if ([self preferredMaxSizeRelativeView] == KTSplitViewFocusedViewFlag_SecondView) {
-		anActualMaxSize = MAX([self preferredSecondViewMinSize], [self preferredMaxSize]);
-	}
-	return anActualMaxSize;
 }
 
 // |thePosition| is an x or y value
