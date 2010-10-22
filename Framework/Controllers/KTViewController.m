@@ -55,6 +55,7 @@
 
 @interface KTViewController (Private)
 - (void)releaseNibObjects;
+- (void)_setHidden:(BOOL)theHiddenFlag patchResponderChain:(BOOL)thePatchFlag;
 @end
 
 @implementation KTViewController
@@ -156,10 +157,22 @@
 //=========================================================== 
 - (void)setHidden:(BOOL)theBool
 {
-	mHidden = theBool;
+	mHidden = theBool;	
+	for(KTViewController * aSubcontroller in [self subcontrollers])
+		[aSubcontroller setHidden:theBool];
+	//	[aSubcontroller _setHidden:theBool patchResponderChain:NO];//
 	[[self windowController] patchResponderChain];
 }
 
+
+- (void)_setHidden:(BOOL)theHiddenFlag patchResponderChain:(BOOL)thePatchFlag
+{
+	[self willChangeValueForKey:@"hidden"];
+	mHidden = theHiddenFlag;
+	if(thePatchFlag)
+		[[self windowController] patchResponderChain];
+	[self didChangeValueForKey:@"hidden"];
+}
 
 
 //#pragma mark -
