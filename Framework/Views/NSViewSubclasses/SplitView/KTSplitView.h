@@ -72,6 +72,11 @@ typedef enum
 	BOOL								mResetResizeInformation;
 	CGFloat								mResizeInformation;
 	NSViewAnimation *					mAnimator;
+	
+	CGFloat								mPreferredFirstViewMinSize;
+	CGFloat								mPreferredFirstViewMaxSize;
+	CGFloat								mPreferredSecondViewMinSize;
+	CGFloat								mPreferredSecondViewMaxSize;
 }
 
 @property (nonatomic, readwrite, assign) IBOutlet id <KTSplitViewDelegate> delegate;
@@ -89,6 +94,8 @@ typedef enum
 - (KTView*)firstViewContainer;
 - (KTView*)secondViewContainer;
 - (void)setFirstView:(NSView<KTView>*)theFirstView secondView:(NSView<KTView>*)theSecondView;
+- (void)setPreferredMinSize:(CGFloat)theFloat forView:(KTSplitViewFocusedViewFlag)theView;
+- (void)setPreferredMaxSize:(CGFloat)theFloat forView:(KTSplitViewFocusedViewFlag)theView;
 - (void)setDividerPosition:(CGFloat)thePosition relativeToView:(KTSplitViewFocusedViewFlag)theView;
 - (void)setDividerPosition:(CGFloat)thePosition relativeToView:(KTSplitViewFocusedViewFlag)theView animate:(BOOL)theBool animationDuration:(float)theTimeInSeconds;
 - (CGFloat)dividerPositionRelativeToView:(KTSplitViewFocusedViewFlag)theFocusedViewFlag;

@@ -12,6 +12,10 @@
 
 
 @interface KTSplitView ()
+@property (readwrite, nonatomic, assign) CGFloat preferredFirstViewMinSize;
+@property (readwrite, nonatomic, assign) CGFloat preferredFirstViewMaxSize;
+@property (readwrite, nonatomic, assign) CGFloat preferredSecondViewMinSize;
+@property (readwrite, nonatomic, assign) CGFloat preferredSecondViewMaxSize;
 
 @end
 
@@ -31,6 +35,10 @@
 @synthesize userInteractionEnabled = mUserInteractionEnabled;
 @synthesize divider = mDivider;
 
+@synthesize	preferredFirstViewMinSize = mPreferredFirstViewMinSize;
+@synthesize	preferredFirstViewMaxSize = mPreferredFirstViewMaxSize;
+@synthesize	preferredSecondViewMinSize = mPreferredSecondViewMinSize;
+@synthesize	preferredSecondViewMaxSize = mPreferredSecondViewMaxSize;
 
 //=========================================================== 
 // - initWithFrame:dividerOrientation
@@ -363,6 +371,26 @@
 	mResizeInformation = 0;
 }
 
+#pragma mark -
+#pragma mark Constraints
+
+- (void)setPreferredMinSize:(CGFloat)theFloat forView:(KTSplitViewFocusedViewFlag)theView;
+{
+	if (theView == KTSplitViewFocusedViewFlag_FirstView) {
+		[self setPreferredFirstViewMinSize:theFloat];
+	} else {
+		[self setPreferredSecondViewMinSize:theFloat];		
+	}
+}
+
+- (void)setPreferredMaxSize:(CGFloat)theFloat forView:(KTSplitViewFocusedViewFlag)theView;
+{
+	if (theView == KTSplitViewFocusedViewFlag_FirstView) {
+		[self setPreferredFirstViewMaxSize:theFloat];
+	} else {
+		[self setPreferredSecondViewMaxSize:theFloat];		
+	}	
+}
 
 #pragma mark -
 #pragma mark Divider Position
