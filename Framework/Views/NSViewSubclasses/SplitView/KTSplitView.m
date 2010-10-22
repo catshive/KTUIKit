@@ -405,23 +405,16 @@
 {
 	CGFloat aNewPosition = thePosition;
 	if([self dividerOrientation] == KTSplitViewDividerOrientation_Horizontal) {
-		
+
+		aNewPosition = MIN(MAX(aNewPosition, 0.0), NSMaxY([self bounds]));
 	} else {
 		// First limit the position such that the views cannot be shrunk further than their mins.
 		aNewPosition = MAX(thePosition, NSMinX([self bounds]) + [self preferredFirstViewMinSize]);
 		aNewPosition = MIN(aNewPosition, NSMaxX([self bounds]) - [self preferredSecondViewMinSize]);
 		
-		
-//		if(thePosition < [self preferredFirstViewMinSize])
-//			aNewPosition = [self preferredFirstViewMinSize];
-//		else if(thePosition > [self preferredFirstViewMaxSize])
-//			aNewPosition = [self preferredFirstViewMaxSize];
-//		else if(thePosition < [self preferredSecondViewMinSize])
-//			aNewPosition = [self preferredSecondViewMinSize];
-//		else if(thePosition > [self preferredSecondViewMaxSize])
-//			aNewPosition = [self preferredSecondViewMaxSize];
+		aNewPosition = MIN(MAX(aNewPosition, 0.0), NSMaxX([self bounds]));
 	}
-			NSLog(@"%p %s %f %f", self, __func__, thePosition, aNewPosition);
+	NSLog(@"%p %s %f %f", self, __func__, thePosition, aNewPosition);
 	return aNewPosition;
 }
 
