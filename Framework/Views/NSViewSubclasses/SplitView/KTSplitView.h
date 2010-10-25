@@ -72,6 +72,8 @@ typedef enum
 	CGFloat								mDividerPositionToSet;
 	BOOL								mResetResizeInformation;
 	CGFloat								mResizeInformation;
+	CGFloat								mAbsoluteResizeInformation;
+	CGFloat								mProportionalResizeInformation;
 	NSViewAnimation *					mAnimator;
 	
 	CGFloat								mPreferredFirstViewMinSize;

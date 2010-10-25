@@ -190,6 +190,7 @@
 //===========================================================
 - (void)setFrameSize:(NSSize)theNewFrameSize
 {
+//	NSLog(@"%p %s %@ %@", self, __func__, NSStringFromSize(theNewFrameSize), [self label]);
 	//	NSLog(@"%@ setFrame", self);
 	// when the split view's frame is set, we need to 
 	// check the desired resizing behavior to determine where to position the divider
@@ -230,24 +231,15 @@
 			{
 				// if this is the first resize after the divider last moved, we need to cache the information
 				// we need to calculate the position of the divider during a live resize
-				if(mResetResizeInformation == YES)
-				{	
-					mResizeInformation = floor(((anOldDividerFrame.origin.y+anOldDividerFrame.size.height*.5) / anOldViewBounds.size.height) * 100.0);
-					mResetResizeInformation = NO;
-				}
-				CGFloat aDividerPosition = ((theNewFrameSize.height*mResizeInformation)/100.0) - (anOldDividerFrame.size.height*.5);
+				CGFloat aDividerPosition = ((theNewFrameSize.height*mProportionalResizeInformation)) - (anOldDividerFrame.size.height*.5);
 				aDividerPosition = floor(aDividerPosition);
 				[[self divider] setFrame:NSMakeRect(anOldDividerFrame.origin.x, aDividerPosition, theNewFrameSize.width, anOldDividerFrame.size.height)];
 			}
 			else
 			{
-				if(mResetResizeInformation == YES)
-				{
-					mResizeInformation = floor(((anOldDividerFrame.origin.x+anOldDividerFrame.size.width*.5) / anOldViewBounds.size.width) * 100.0);
-					mResetResizeInformation = NO;
-				}
-				CGFloat aDividerPosition = ((theNewFrameSize.width*mResizeInformation)/100.0) - (anOldDividerFrame.size.width*.5);
+				CGFloat aDividerPosition = ((theNewFrameSize.width*mProportionalResizeInformation)) - (anOldDividerFrame.size.width*.5);
 				aDividerPosition = floor(aDividerPosition);
+//				NSLog(@"%p %s propotion:%f poistion:%f %@", self, __func__, mProportionalResizeInformation, aDividerPosition, [self label]);
 				[[self divider]  setFrame:NSMakeRect(aDividerPosition, anOldDividerFrame.origin.y, anOldDividerFrame.size.width, theNewFrameSize.height)];
 			}
 		}
@@ -258,26 +250,16 @@
 		{
 			if([self dividerOrientation] == KTSplitViewDividerOrientation_Horizontal)
 			{
-				if(mResetResizeInformation == YES)
-				{
-					mResizeInformation = [[self firstViewContainer] frame].size.height;
-					mResetResizeInformation = NO;
-				}
-				CGFloat aNewYOrdinate = theNewFrameSize.height-mResizeInformation;
-				CGFloat aConstrainedYOrdinate = [self dividerPositionForProposedPosition:aNewYOrdinate];
-				mResizeInformation = theNewFrameSize.height - aConstrainedYOrdinate;
+				CGFloat aYOrdinate = theNewFrameSize.height-mAbsoluteResizeInformation;
+				CGFloat aConstrainedYOrdinate = [self dividerPositionForProposedPosition:aYOrdinate];
+//				mAbsoluteResizeInformation = theNewFrameSize.height - aConstrainedYOrdinate;
 				[[self divider] setFrame:NSMakeRect(anOldDividerFrame.origin.x, aConstrainedYOrdinate, theNewFrameSize.width, anOldDividerFrame.size.height)];
 			}
 			else
 			{
-				if(mResetResizeInformation == YES)
-				{
-					mResizeInformation = NSMaxX([[self firstViewContainer] frame]) /*[[self firstViewContainer] frame].origin.x+[[self firstViewContainer]  frame].size.width*/;
-					mResetResizeInformation = NO;
-				}
 				// We override the resize information with the constrain, losing the original size. If you don't want to lose it try constraining a local var only. However this behaviour would be very different, so try it out.
-				mResizeInformation = [self dividerPositionForProposedPosition:mResizeInformation];
-				[[self divider] setFrame:NSMakeRect(mResizeInformation, anOldDividerFrame.origin.y, anOldDividerFrame.size.width, theNewFrameSize.height)];
+				mAbsoluteResizeInformation = [self dividerPositionForProposedPosition:mAbsoluteResizeInformation];
+				[[self divider] setFrame:NSMakeRect(mAbsoluteResizeInformation, anOldDividerFrame.origin.y, anOldDividerFrame.size.width, theNewFrameSize.height)];
 			}
 		}		
 			break;
@@ -285,24 +267,14 @@
 		case KTSplitViewResizeBehavior_MaintainSecondViewSize:
 			if([self dividerOrientation] == KTSplitViewDividerOrientation_Horizontal)
 			{
-				if(mResetResizeInformation == YES)
-				{
-					mResizeInformation = [[self secondViewContainer] frame].size.height;
-					mResetResizeInformation = NO;
-				}
-				mResizeInformation = [self dividerPositionForProposedPosition:mResizeInformation];
-				[[self divider] setFrame:NSMakeRect(anOldDividerFrame.origin.x, mResizeInformation, theNewFrameSize.width, anOldDividerFrame.size.height)];
+				CGFloat aConstrainedYOrdinate = [self dividerPositionForProposedPosition:mAbsoluteResizeInformation];
+				[[self divider] setFrame:NSMakeRect(anOldDividerFrame.origin.x, aConstrainedYOrdinate, theNewFrameSize.width, anOldDividerFrame.size.height)];
 			}
 			else
 			{
-				if(mResetResizeInformation == YES)
-				{
-					mResizeInformation = [[self secondViewContainer] frame].size.width;
-					mResetResizeInformation = NO;
-				}
-				CGFloat anXOrdinate = theNewFrameSize.width - mResizeInformation - NSWidth(anOldDividerFrame);
+				CGFloat anXOrdinate = theNewFrameSize.width - mAbsoluteResizeInformation - NSWidth(anOldDividerFrame);
 				CGFloat aConstrainedXOrdinate = [self dividerPositionForProposedPosition:anXOrdinate];
-				mResizeInformation = theNewFrameSize.width - aConstrainedXOrdinate - NSWidth(anOldDividerFrame);
+//				mAbsoluteResizeInformation = theNewFrameSize.width - aConstrainedXOrdinate - NSWidth(anOldDividerFrame);
 				[[self divider] setFrame:NSMakeRect(aConstrainedXOrdinate, anOldDividerFrame.origin.y, anOldDividerFrame.size.width, theNewFrameSize.height)];
 			}		
 			
@@ -311,6 +283,8 @@
 		default:
 			break;
 	}
+	
+//	[super setFrameSize:theNewFrameSize];
 }
 
 
@@ -320,6 +294,7 @@
 //===========================================================
 - (void)layoutViews
 {
+	//NSLog(@"%p %s %@ %@", self, __func__, NSStringFromRect([self bounds]), [self label]);
 	NSRect aSplitViewBounds = [self bounds];
 	
 	if(		aSplitViewBounds.size.width < 0
@@ -383,8 +358,33 @@
 //===========================================================
 - (void)resetResizeInformation
 {
-	mResetResizeInformation = YES;
-	mResizeInformation = 0;
+	NSRect aDividerFrame = [[self divider] frame];
+	if (mCanSetDividerPosition == NO) {
+		aDividerFrame.origin = NSMakePoint(mDividerPositionToSet, mDividerPositionToSet);
+	}
+	NSRect aBounds = [self bounds];
+	if ([self resizeBehavior] == KTSplitViewResizeBehavior_MaintainProportions) {
+		if ([self dividerOrientation] == KTSplitViewDividerOrientation_Horizontal) {
+			mProportionalResizeInformation = NSMidY(aDividerFrame) / NSHeight(aBounds);
+		} else {
+			mProportionalResizeInformation = NSMidX(aDividerFrame) / NSWidth(aBounds);
+		}
+	} else if ([self resizeBehavior] == KTSplitViewResizeBehavior_MaintainFirstViewSize) {
+		if ([self dividerOrientation] == KTSplitViewDividerOrientation_Horizontal) {
+			mAbsoluteResizeInformation = NSMaxY(aBounds) - NSMinY(aDividerFrame);
+		} else {
+			mAbsoluteResizeInformation = NSMinX(aDividerFrame) - NSMinX(aBounds);	
+		}		
+	} else if ([self resizeBehavior] == KTSplitViewResizeBehavior_MaintainSecondViewSize) {
+		if ([self dividerOrientation] == KTSplitViewDividerOrientation_Horizontal) {
+			mAbsoluteResizeInformation = NSMinY(aDividerFrame) - NSMinY(aBounds);
+		} else {
+			mAbsoluteResizeInformation = NSMaxX(aBounds) - NSMinX(aDividerFrame);
+		}	
+	}
+	
+//	mResetResizeInformation = YES;
+//	mResizeInformation = 0;
 }
 
 #pragma mark -
@@ -511,7 +511,7 @@
 		}
 		
 		// Force |aNewPosition| within the bounds of the split view
-		aNewPosition = MIN(MAX(aNewPosition, 0.0), NSMaxY(aBounds));
+		aNewPosition = MIN(MAX(aNewPosition, NSMinY(aBounds)), NSMaxY(aBounds) - NSHeight(aDividerFrame));
 	} else {
 		// First limit the position such that the views cannot be shrunk further than their mins.
 		aNewPosition = MAX(aNewPosition, NSMinX(aBounds) + [self preferredFirstViewMinSize]);
@@ -524,7 +524,7 @@
 		}
 		
 		// Force |aNewPosition| within the bounds of the split view
-		aNewPosition = MIN(MAX(aNewPosition, 0.0), NSMaxX(aBounds) - NSWidth(aDividerFrame));
+		aNewPosition = MIN(MAX(aNewPosition, NSMinX(aBounds)), NSMaxX(aBounds) - NSWidth(aDividerFrame));
 	}
 	return aNewPosition;
 }
@@ -566,9 +566,8 @@
 			thePosition = [self dividerPositionForProposedPosition:thePosition];
 			[[self divider] setFrame:NSMakeRect(thePosition, aDividerFrame.origin.y, aDividerFrame.size.width, aDividerFrame.size.height)];
 		}
-		
-		[self resetResizeInformation];
 	}
+	[self resetResizeInformation];
 }
 
 
