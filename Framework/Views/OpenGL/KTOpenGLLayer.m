@@ -285,13 +285,13 @@
 {
 	NSPoint aPointToReturn = thePoint;
 	// go up the layer tree until we find the view - we will adjust our coordinates for each layer
-	KTOpenGLLayer * aLayer = self;
-	while(aLayer != nil)
+	KTOpenGLLayer * aSuperLayer = [self superlayer];
+	while(aSuperLayer != nil)
 	{
-		NSRect aLayerFrame = [aLayer frame];
+		NSRect aLayerFrame = [aSuperLayer frame];
 		aPointToReturn.x+=aLayerFrame.origin.x;
 		aPointToReturn.y+=aLayerFrame.origin.y;
-		aLayer = [aLayer superlayer];
+		aSuperLayer = [aSuperLayer superlayer];
 	}
 	return aPointToReturn;
 }
