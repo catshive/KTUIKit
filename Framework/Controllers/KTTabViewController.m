@@ -35,6 +35,8 @@
 @synthesize shouldResizeTabViews = mShouldResizeTabViews;
 @synthesize delegate = wDelegate;
 
+static void *_KTTVCTabItemArrayControllerSelectionIndexObservationContext = (void *)@"_KTTVCTabItemArrayControllerSelectionIndexObservationContext";
+
 //=========================================================== 
 // - initWithNibName:bundle:windowController
 //===========================================================
@@ -54,7 +56,7 @@
 		// we let this view controller manage selection for us
 		mTabItemArrayController = [[NSArrayController alloc] init];
 		[mTabItemArrayController setSelectsInsertedObjects:YES];
-		[mTabItemArrayController addObserver:self forKeyPath:@"selectionIndex"options:0 context:nil];
+		[mTabItemArrayController addObserver:self forKeyPath:@"selectionIndex"options:0 context:&_KTTVCTabItemArrayControllerSelectionIndexObservationContext];
 		
 		[self setShouldResizeTabViews:YES];
 	}
@@ -90,16 +92,17 @@
 //===========================================================
 - (void)observeValueForKeyPath:(NSString *)theKeyPath ofObject:(id)theObject change:(NSDictionary *)theChange context:(void *)theContext
 {
-	if(theObject == mTabItemArrayController)
+	if(theContext == &_KTTVCTabItemArrayControllerSelectionIndexObservationContext)
 	{
-		if([theKeyPath isEqualToString:@"selectionIndex"])
-		{
-			NSInteger aSelectedIndex = [mTabItemArrayController selectionIndex];
-			KTTabItem * aNewTabToSelect = nil;
-			if(aSelectedIndex!=NSNotFound)
-				aNewTabToSelect = [[mTabItemArrayController arrangedObjects] objectAtIndex:aSelectedIndex];
-			[self _selectTabItem:aNewTabToSelect];
-		}
+		NSInteger aSelectedIndex = [mTabItemArrayController selectionIndex];
+		KTTabItem * aNewTabToSelect = nil;
+		if(aSelectedIndex!=NSNotFound)
+			aNewTabToSelect = [[mTabItemArrayController arrangedObjects] objectAtIndex:aSelectedIndex];
+		[self _selectTabItem:aNewTabToSelect];
+	} 
+	else 
+	{
+		[super observeValueForKeyPath:theKeyPath ofObject:theObject change:theChange context:theContext];
 	}
 }
 
